@@ -257,3 +257,98 @@ document.addEventListener('DOMContentLoaded', function() {
     exportBtn.addEventListener('click', exportToJson);
   }
 });
+// Initialize filter on load
+function initFilter() {
+  populateCategories();
+  restoreLastFilter();
+  
+  // Set up event listeners
+  document.getElementById('categoryFilter').addEventListener('change', filterQuotes);
+  document.getElementById('resetFilter').addEventListener('click', resetFilter);
+}
+
+// Populate category dropdown with unique categories
+function populateCategories() {
+  const categoryFilter = document.getElementById('categoryFilter');
+  
+  // Save current selection
+  const currentValue = categoryFilter.value;
+  
+  // Clear existing options (keeping "All Categories")
+  while (categoryFilter.options.length > 1) {
+    categoryFilter.remove(1);
+  }
+  
+  // Get unique categories from quotes
+  const uniqueCategories = [...new Set(quotes.map(quote => quote.category))];
+  
+  // Add categories to dropdown
+  uniqueCategories.forEach(category => {
+    const option = document.createElement('option');
+    option.value = category;
+    option.textContent = category;
+    categoryFilter.appendChild(option);
+  });
+  
+  // Restore selection if it still exists
+  if (currentValue !== 'all' && uniqueCategories.includes(currentValue)) {
+    categoryFilter.value = currentValue;
+  }
+}
+
+// Filter quotes based on selected category
+function filterQuotes() {
+  const selectedCategory = document.getElementById('categoryFilter').value;
+  
+  // Save to localStorage
+  localStorage.setItem('lastCategoryFilter', selectedCategory);
+  
+  // Filter quotes
+  const filteredQuotes = selectedCategory === 'all' 
+    ? quotes 
+    : quotes.filter(quote => quote.category === selectedCategory);
+  
+  // Update display
+  displayQuotes(filteredQuotes);
+  
+  // Show current filter status
+  showMessage(`Showing ${filteredQuotes.length} quotes in category: ${selectedCategory === 'all' ? 'All' : selectedCategory}`);
+}
+
+// Restore last filter from localStorage
+function restoreLastFilter() {
+  const lastFilter = localStorage.getItem('lastCategoryFilter');
+  if (lastFilter) {
+    document.getElementById('categoryFilter').value = lastFilter;
+    filterQuotes(); // Apply the filter
+  }
+}
+
+// Reset filter to show all quotes
+function resetFilter() {
+  document.getElementById('categoryFilter').value = 'all';
+  filterQuotes();
+}
+
+// Update the addQuote function to handle new categories
+function addQuote() {
+  // ... existing addQuote code ...
+  
+  // After adding the quote:
+  const categoryExists = [...document.getElementById('categoryFilter').options]
+    .some(option => option.value === newQuote.category);
+    
+  if (!categoryExists) {
+    populateCategories(); // Refresh category list if new category was added
+  }
+  
+  saveQuotes(); // Save to localStorage
+  filterQuotes(); // Re-apply current filter
+}
+
+// Initialize everything when DOM loads
+document.addEventListener('DOMContentLoaded', () => {
+  loadQuotes();
+  initFilter();
+  // ... other initialization code ...
+});
