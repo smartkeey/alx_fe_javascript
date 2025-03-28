@@ -7,37 +7,107 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
     }
-    #quoteDisplay {
+    .quote-container {
+      background-color: #f5f5f5;
+      padding: 20px;
+      border-radius: 5px;
       margin: 20px 0;
-      padding: 10px;
-      border: 1px solid #ccc;
-      background-color: #f9f9f9;
+    }
+    .quote-text {
+      font-size: 1.2em;
+      font-style: italic;
+    }
+    .quote-category {
+      margin-top: 10px;
+      font-weight: bold;
+      color: #555;
     }
     button {
-      padding: 10px 20px;
-      margin: 5px;
+      padding: 8px 15px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
       cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background-color: #45a049;
     }
     input {
-      padding: 10px;
+      padding: 8px;
       margin: 5px;
-      width: 200px;
+      width: 300px;
+    }
+    .category-filter {
+      margin: 20px 0;
+    }
+    .form-container {
+      background-color: #e9e9e9;
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+    .import-export {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #e9f7ef;
+      border-radius: 5px;
+    }
+    .message {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    .error {
+      background-color: #ffdddd;
+      color: #d8000c;
+    }
+    .success {
+      background-color: #ddffdd;
+      color: #4F8A10;
     }
   </style>
 </head>
 <body>
   <h1>Dynamic Quote Generator</h1>
-  <div id="quoteDisplay">Click "Show New Quote" to see a random quote!</div>
-  <button id="newQuote">Show New Quote</button>
-
-  <div>
-    <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
-    <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
-    <button onclick="addQuote()">Add Quote</button>
+  
+  <div class="category-filter">
+    <label for="categorySelect">Filter by category:</label>
+    <select id="categorySelect">
+      <option value="all">All Categories</option>
+    </select>
+    <button id="newQuote">Show Random Quote</button>
   </div>
-
+  
+  <div id="quoteDisplay" class="quote-container">
+    <p class="quote-text">Click the button to display a random quote!</p>
+    <p class="quote-category"></p>
+  </div>
+  
+  <div class="form-container">
+    <h3>Add New Quote</h3>
+    <div>
+      <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
+      <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
+      <button onclick="addQuote()">Add Quote</button>
+    </div>
+  </div>
+  
+  <div class="import-export">
+    <h3>Data Management</h3>
+    <button onclick="exportToJson()">Export Quotes to JSON</button>
+    <div style="margin-top: 10px;">
+      <label for="importFile">Import Quotes from JSON:</label>
+      <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
+    </div>
+  </div>
+  
   <script src="script.js"></script>
 </body>
 </html>
