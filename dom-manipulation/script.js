@@ -206,3 +206,54 @@ function showMessage(message, type) {
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', init);
+
+function exportToJson() {
+  if (!quotes || quotes.length === 0) {
+    showMessage('No quotes available to export', 'error');
+    return;
+  }
+
+  try {
+    // Format the JSON with 2-space indentation
+    const jsonString = JSON.stringify(quotes, null, 2);
+    
+    // Create blob with proper MIME type
+    const blob = new Blob([jsonString], { 
+      type: 'application/json;charset=utf-8' 
+    });
+    
+    // Create temporary download link
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    
+    // Set filename with current date
+    const dateStr = new Date().toISOString().slice(0, 10);
+    a.download = `my-quotes-${dateStr}.json`;
+    
+    // Trigger download
+    document.body.appendChild(a);
+    a.click();
+    
+    // Clean up
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
+    
+    showMessage(`Exported ${quotes.length} quotes successfully!`, 'success');
+  } catch (error) {
+    showMessage(`Export failed: ${error.message}`, 'error');
+    console.error('Export error:', error);
+  }
+}
+
+// Initialize the app
+document.addEventListener('DOMContentLoaded', function() {
+  // Add export button event listener
+  const exportBtn = document.getElementById('exportJson');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', exportToJson);
+  }
+});
