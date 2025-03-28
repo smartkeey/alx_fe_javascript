@@ -98,7 +98,14 @@
       <button onclick="addQuote()">Add Quote</button>
     </div>
   </div>
-  
+  <div class="filter-controls">
+  <label for="categoryFilter">Filter by category:</label>
+  <select id="categoryFilter">
+    <option value="all">All Categories</option>
+    <!-- Categories will be populated dynamically -->
+  </select>
+  <button id="resetFilter">Reset Filter</button>
+</div>
   <div class="import-export">
     <h3>Data Management</h3>
     <button onclick="exportToJson()">Export Quotes to JSON</button>
