@@ -554,3 +554,55 @@ document.addEventListener('DOMContentLoaded', () => {
   // ... existing initialization code ...
   initSync();
 });
+
+import { initSync } from './server.js';
+
+// In your main application initialization:
+document.addEventListener('DOMContentLoaded', () => {
+  // ... existing initialization code ...
+  
+  // Initialize sync functionality
+  const sync = initSync(handleSyncUpdate);
+  
+  // Add manual sync button
+  document.getElementById('manual-sync').addEventListener('click', sync.manualSync);
+});
+
+// Handle sync status updates
+function handleSyncUpdate({ status, message, serverChanges, localChanges }) {
+  const statusElement = document.getElementById('sync-status');
+  const messageElement = document.getElementById('sync-message');
+  
+  messageElement.textContent = message;
+  
+  // Update UI based on sync status
+  switch (status) {
+    case 'syncing':
+      statusElement.className = 'sync-status syncing';
+      break;
+    case 'success':
+      statusElement.className = 'sync-status success';
+      break;
+    case 'error':
+      statusElement.className = 'sync-status error';
+      break;
+    case 'conflict':
+      statusElement.className = 'sync-status conflict';
+      showConflictDialog(serverChanges, localChanges);
+      break;
+  }
+}
+
+// Conflict resolution dialog
+function showConflictDialog(serverChanges, localChanges) {
+  const dialog = document.getElementById('conflict-dialog');
+  const serverCount = serverChanges.length;
+  const localCount = localChanges.length;
+  
+  document.getElementById('conflict-server-count').textContent = serverCount;
+  document.getElementById('conflict-local-count').textContent = localCount;
+  
+  dialog.style.display = 'block';
+}
+
+// Resolution functions would be implemented here...
