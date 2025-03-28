@@ -131,7 +131,25 @@
 </head>
 <body>
   <h1>Dynamic Quote Generator</h1>
+  <div id="sync-status" class="sync-status">
+      Initializing sync system...
+    </div>
+    
+    <button id="manual-sync" class="sync-button">
+      Sync Now
+    </button>
+    
+    <div id="quote-display" class="quotes-container"></div>
+    
+    <form id="add-quote-form" class="quote-form">
+      <h3>Add New Quote</h3>
+      <input type="text" name="text" placeholder="Quote text" required>
+      <input type="text" name="category" placeholder="Category" required>
+      <button type="submit">Add Quote</button>
+    </form>
+  </div>
   
+  <script type="module" src="main.js"></script>
   <div class="category-filter">
     <label for="categorySelect">Filter by category:</label>
     <select id="categorySelect">
