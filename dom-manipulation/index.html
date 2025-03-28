@@ -72,6 +72,61 @@
       background-color: #ddffdd;
       color: #4F8A10;
     }
+    .sync-status {
+  padding: 10px;
+  background: #f0f0f0;
+  margin: 10px 0;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sync-button {
+  padding: 5px 10px;
+  background: #4a89dc;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.sync-button:hover {
+  background: #3b7dd8;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  width: 80%;
+  max-width: 500px;
+}
+
+.conflict-options {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  justify-content: space-between;
+}
+
+.conflict-options button {
+  padding: 8px 12px;
+  flex: 1;
+}
   </style>
 </head>
 <body>
@@ -84,7 +139,23 @@
     </select>
     <button id="newQuote">Show Random Quote</button>
   </div>
-  
+  <div id="sync-status" class="sync-status">
+  <span id="sync-message">Syncing...</span>
+  <button id="manual-sync" class="sync-button">Sync Now</button>
+  <button id="resolve-conflicts" class="sync-button" style="display:none;">Resolve Conflicts</button>
+</div>
+
+<div id="conflict-modal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <h3>Conflict Detected</h3>
+    <p>Your local quotes differ from the server version. Which version would you like to keep?</p>
+    <div class="conflict-options">
+      <button id="keep-local">Keep My Changes</button>
+      <button id="use-server">Use Server Version</button>
+      <button id="merge-changes">Merge Changes</button>
+    </div>
+  </div>
+</div>
   <div id="quoteDisplay" class="quote-container">
     <p class="quote-text">Click the button to display a random quote!</p>
     <p class="quote-category"></p>
