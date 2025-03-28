@@ -352,3 +352,205 @@ document.addEventListener('DOMContentLoaded', () => {
   initFilter();
   // ... other initialization code ...
 });
+
+// Server simulation using JSONPlaceholder
+const API_URL = 'https://jsonplaceholder.typicode.com/posts';
+let lastSyncTime = null;
+let syncInProgress = false;
+let conflictsDetected = false;
+
+// Initialize sync functionality
+function initSync() {
+  // Load last sync time from localStorage
+  lastSyncTime = localStorage.getItem('lastSyncTime') || null;
+  
+  // Set up event listeners
+  document.getElementById('manual-sync').addEventListener('click', manualSync);
+  document.getElementById('resolve-conflicts').addEventListener('click', showConflictModal);
+  document.getElementById('keep-local').addEventListener('click', () => resolveConflict('local'));
+  document.getElementById('use-server').addEventListener('click', () => resolveConflict('server'));
+  document.getElementById('merge-changes').addEventListener('click', () => resolveConflict('merge'));
+  
+  // Start periodic sync (every 30 seconds)
+  setInterval(autoSync, 30000);
+  
+  // Initial sync
+  autoSync();
+}
+
+// Automatic sync function
+async function autoSync() {
+  if (syncInProgress) return;
+  
+  try {
+    syncInProgress = true;
+    updateSyncStatus('Syncing with server...');
+    
+    // Get server data
+    const serverQuotes = await fetchServerData();
+    
+    // Compare with local data
+    const localQuotes = JSON.parse(localStorage.getItem('quotes') || '[]');
+    
+    if (!areQuotesEqual(localQuotes, serverQuotes)) {
+      conflictsDetected = true;
+      document.getElementById('resolve-conflicts').style.display = 'inline-block';
+      updateSyncStatus('Conflicts detected - click to resolve');
+    } else {
+      // No conflicts, update last sync time
+      lastSyncTime = new Date().toISOString();
+      localStorage.setItem('lastSyncTime', lastSyncTime);
+      updateSyncStatus(`Last synced: ${formatTime(lastSyncTime)}`);
+    }
+  } catch (error) {
+    console.error('Sync failed:', error);
+    updateSyncStatus('Sync failed - try again later');
+  } finally {
+    syncInProgress = false;
+  }
+}
+
+// Manual sync trigger
+function manualSync() {
+  if (!syncInProgress) {
+    autoSync();
+  }
+}
+
+// Fetch data from mock server
+async function fetchServerData() {
+  try {
+    const response = await fetch(API_URL);
+    if (!response.ok) throw new Error('Server error');
+    
+    const data = await response.json();
+    // Transform the mock data into our quote format
+    return data.map(item => ({
+      id: item.id,
+      text: item.title,
+      category: 'server', // Mock server uses a single category
+      body: item.body
+    }));
+  } catch (error) {
+    console.error('Failed to fetch server data:', error);
+    throw error;
+  }
+}
+
+// Compare local and server data
+function areQuotesEqual(localQuotes, serverQuotes) {
+  if (localQuotes.length !== serverQuotes.length) return false;
+  
+  // Simple comparison - in real app you'd want a more robust comparison
+  const localString = JSON.stringify(localQuotes.map(q => ({ text: q.text, category: q.category })));
+  const serverString = JSON.stringify(serverQuotes.map(q => ({ text: q.text, category: q.category })));
+  
+  return localString === serverString;
+}
+
+// Conflict resolution
+function showConflictModal() {
+  document.getElementById('conflict-modal').style.display = 'flex';
+}
+
+function hideConflictModal() {
+  document.getElementById('conflict-modal').style.display = 'none';
+}
+
+async function resolveConflict(resolutionType) {
+  try {
+    updateSyncStatus('Resolving conflicts...');
+    
+    const localQuotes = JSON.parse(localStorage.getItem('quotes') || '[]');
+    const serverQuotes = await fetchServerData();
+    
+    let resolvedQuotes = [];
+    
+    switch (resolutionType) {
+      case 'local':
+        // Keep local version - push to server
+        resolvedQuotes = localQuotes;
+        await pushToServer(localQuotes);
+        break;
+      case 'server':
+        // Use server version
+        resolvedQuotes = serverQuotes;
+        break;
+      case 'merge':
+        // Merge changes - simple implementation
+        resolvedQuotes = mergeQuotes(localQuotes, serverQuotes);
+        await pushToServer(resolvedQuotes);
+        break;
+    }
+    
+    // Update local storage
+    localStorage.setItem('quotes', JSON.stringify(resolvedQuotes));
+    quotes = resolvedQuotes;
+    updateCategoryFilter();
+    showRandomQuote();
+    
+    // Update sync status
+    lastSyncTime = new Date().toISOString();
+    localStorage.setItem('lastSyncTime', lastSyncTime);
+    conflictsDetected = false;
+    document.getElementById('resolve-conflicts').style.display = 'none';
+    updateSyncStatus(`Last synced: ${formatTime(lastSyncTime)}`);
+    
+    showMessage('Conflicts resolved successfully!', 'success');
+  } catch (error) {
+    console.error('Conflict resolution failed:', error);
+    showMessage('Failed to resolve conflicts', 'error');
+  } finally {
+    hideConflictModal();
+  }
+}
+
+// Push data to server
+async function pushToServer(quotes) {
+  // Transform our quotes to the server's format
+  const serverData = quotes.map((quote, index) => ({
+    id: index + 1,
+    title: quote.text,
+    body: quote.category
+  }));
+  
+  // Note: JSONPlaceholder doesn't actually save data, so we just simulate
+  // In a real app, you would make a PUT or POST request here
+  console.log('Simulating server update:', serverData);
+  await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+}
+
+// Merge quotes from both sources
+function mergeQuotes(localQuotes, serverQuotes) {
+  // Simple merge - concatenate and remove duplicates by text
+  const combined = [...localQuotes, ...serverQuotes];
+  const unique = [];
+  const seen = new Set();
+  
+  for (const quote of combined) {
+    if (!seen.has(quote.text)) {
+      seen.add(quote.text);
+      unique.push(quote);
+    }
+  }
+  
+  return unique;
+}
+
+// Helper function to update sync status UI
+function updateSyncStatus(message) {
+  document.getElementById('sync-message').textContent = message;
+}
+
+// Helper function to format time
+function formatTime(isoString) {
+  if (!isoString) return 'Never';
+  const date = new Date(isoString);
+  return date.toLocaleTimeString();
+}
+
+// Initialize sync when DOM loads
+document.addEventListener('DOMContentLoaded', () => {
+  // ... existing initialization code ...
+  initSync();
+});
